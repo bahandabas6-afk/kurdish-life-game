@@ -1,20 +1,76 @@
 <!doctype html>
 <html lang="ku" dir="rtl">
+<head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ژیانی کوردی | Kurdish Life</title>
+<meta name="theme-color" content="#101a26"><title>KURDISH LIFE | ژیانی کوردی</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#101b25;color:#fff;font-family:system-ui,sans-serif}header{padding:16px;background:#183447;text-align:center}h1{margin:0;font-size:25px}main{max-width:760px;margin:auto;padding:14px}.panel{background:#203442;border:1px solid #456071;border-radius:16px;padding:14px;margin:12px 0}.stats{display:flex;gap:8px;justify-content:space-around;flex-wrap:wrap}.stat{background:#122633;padding:10px 14px;border-radius:12px}.town{height:230px;border-radius:14px;background:linear-gradient(#76b6d2 0 48%,#8caa65 48% 100%);position:relative;overflow:hidden}.road{position:absolute;bottom:0;left:0;width:100%;height:75px;background:#444}.road:after{content:"";position:absolute;top:35px;left:0;width:100%;border-top:4px dashed #f5e7a3}.house{position:absolute;bottom:75px;width:90px;height:78px;background:#d9b17d;border:4px solid #76583c}.house:before{content:"";position:absolute;top:-34px;left:-8px;border-left:49px solid transparent;border-right:49px solid transparent;border-bottom:36px solid #814d3d}.house.one{right:12%}.house.two{left:14%;transform:scale(.8)}.player{position:absolute;bottom:77px;left:48%;font-size:40px}.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}button{border:0;border-radius:12px;padding:13px;background:#e2a84b;color:#18232b;font-size:16px;font-weight:700}button:active{transform:scale(.98)}#msg{min-height:48px;line-height:1.7}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101a26;color:white;font-family:system-ui,sans-serif;touch-action:none}
+#game{position:fixed;inset:0}canvas{display:block}
+#top{position:fixed;top:env(safe-area-inset-top,8px);left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+.pill{background:#102536dc;border:1px solid #ffffff30;border-radius:13px;padding:8px 12px;font-size:13px;box-shadow:0 3px 15px #0005}
+#brand{font-weight:800;font-size:16px}
+#help{position:fixed;top:64px;left:10px;background:#102536c9;border-radius:12px;padding:8px 11px;font-size:12px;max-width:210px;line-height:1.6}
+#controls{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));left:14px;right:14px;display:flex;align-items:end;justify-content:space-between;pointer-events:none}
+#stick{width:122px;height:122px;border-radius:50%;background:#10253699;border:2px solid #ffffff66;position:relative;pointer-events:auto;touch-action:none}
+#knob{position:absolute;width:48px;height:48px;border-radius:50%;background:#e7b85cdd;border:2px solid #fff;left:35px;top:35px}
+.actions{display:flex;flex-direction:column;gap:9px;pointer-events:auto}
+button{border:1px solid #ffffff55;background:#183b50ed;color:white;border-radius:14px;padding:12px 15px;font-size:14px;font-weight:700;min-width:112px}
+button:active{background:#d79c3e;color:#18232b}
+#toast{position:fixed;bottom:155px;left:50%;transform:translateX(-50%);background:#102536e8;padding:9px 14px;border-radius:12px;font-size:13px;white-space:nowrap;max-width:90vw;text-align:center}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:#101a26;font-size:18px;z-index:5}
 </style>
-<header><h1>ژیانی کوردی</h1><div>KURDISH LIFE — ژیان لە شارەکانی کوردستان</div></header>
-<main><div class="panel stats"><div class="stat">💵 پارە: <b id="money">500</b> د.ع</div><div class="stat">⚡ وزە: <b id="energy">100</b>%</div><div class="stat">📍 شوێن: سلێمانی</div></div>
-<div class="town"><div class="house one"></div><div class="house two"></div><div class="road"></div><div class="player">🧍🏻‍♂️</div></div>
-<div class="panel"><h3>بەخێربێیت بۆ ژیانی کوردی!</h3><p id="msg">ئاراس لە سلێمانییە. کار بکە، پارە کۆبکەرەوە و شار بناسە.</p></div>
-<div class="panel"><h3>کار و چالاکییەکان</h3><div class="actions"><button onclick="work()">🧰 کارکردن (+200)</button><button onclick="walk()">🚶 گەشت لە شار</button><button onclick="eat()">🍞 نان خواردن (-50)</button><button onclick="travel()">🚗 چوون بۆ هەولێر (-100)</button></div></div>
-</main>
-<script>
-let money=500,energy=100,place='سلێمانی';function say(t){document.getElementById('msg').textContent=t;document.getElementById('money').textContent=money;document.getElementById('energy').textContent=energy;document.querySelector('.stats .stat:last-child').textContent='📍 شوێن: '+place}
-function work(){if(energy<20)return say('وزەت کەمە؛ سەرەتا نان بخۆ.');money+=200;energy=Math.max(0,energy-20);say('ئافەرین! کارت کرد و ٢٠٠ دینارت بەدەستهێنا.')}
-function walk(){energy=Math.max(0,energy-10);say('لە '+place+' گەڕایت؛ شار جوانە و خەڵک خەریکی ژیانن.')}
-function eat(){if(money<50)return say('پارەت بەس نییە بۆ نان.');money-=50;energy=Math.min(100,energy+35);say('نانت خوارد و وزەت گەڕایەوە.')}
-function travel(){if(money<100)return say('پارەت بەس نییە بۆ گەشت.');money-=100;place=place==='سلێمانی'?'هەولێر':'سلێمانی';say('گەشتت کرد بۆ '+place+'!')}
-</script></html>
+</head>
+<body>
+<div id="game"></div><div id="loading">🎮 خەریکی بارکردنی ژیانی کوردی...</div>
+<div id="top"><div class="pill" id="brand">KURDISH LIFE | ژیانی کوردی</div><div class="pill">💵 <span id="cash">500</span> د.ع</div><div class="pill">📍 سلێمانی</div></div>
+<div id="help">ئاراس لە شاری سلێمانییە<br>جوڵە: جوڵاندنی بازنەکە یان WASD</div>
+<div id="controls"><div id="stick"><div id="knob"></div></div><div class="actions"><button id="carBtn">🚗 سواربوونی ئۆتۆمبێل</button><button id="jobBtn">🧰 کارکردن +200</button></div></div>
+<div id="toast">بەخێربێیت! شارەکە بگەڕێ و ئۆتۆمبێلەکە تاقی بکەرەوە.</div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const root=document.getElementById('game'),loading=document.getElementById('loading');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x9bc9df);scene.fog=new THREE.Fog(0x9bc9df,55,190);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,300);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;root.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xd9efff,0x65704c,2));
+const sun=new THREE.DirectionalLight(0xffedce,2.3);sun.position.set(-35,55,25);sun.castShadow=true;scene.add(sun);
+const mat=(c,r=.85)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(260,260),mat(0x78915a));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+function box(x,y,z,sx,sy,sz,color){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat(color));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m}
+const road=box(0,.035,0,15,.07,220,0x343a40);const road2=box(0,.04,0,220,.07,15,0x343a40);
+for(let i=-100;i<=100;i+=12){box(0,.08,i,.22,.025,5,0xf5e5a8);box(i,.085,0,5,.025,.22,0xf5e5a8)}
+// Kurdish mountain ridge
+for(let i=0;i<18;i++){const h=18+Math.random()*22,m=new THREE.Mesh(new THREE.ConeGeometry(13,h,5),mat(i%2?0x637d70:0x718a78));m.position.set(-125+i*15,h/2-1,-100-Math.random()*18);m.rotation.y=Math.random();scene.add(m)}
+const colors=[0xd4b28a,0xc8c1a9,0xb8a18a,0xd9d0bc,0x9daeb0,0xc49b78];
+for(let x=-48;x<=48;x+=16)for(let z=-55;z<=55;z+=18){if(Math.abs(x)<12||Math.abs(z)<10)continue;let w=8+Math.random()*3,h=7+Math.random()*16,d=8+Math.random()*3;let b=box(x,h/2,z,w,h,d,colors[Math.floor(Math.random()*colors.length)]);const roof=box(x,h+.15,z,w+.3,.35,d+.3,0x855b49);box(x,h*.57,z-d/2-.04,1.2,2,.1,0x354e5a);for(let yy=2;yy<h-1;yy+=3)for(let xx=-w/2+1;xx<w/2;xx+=2.5)box(x+xx,yy,z-d/2-.08,1,.9,.08,0x83b9c8)}
+// trees
+for(let i=0;i<65;i++){let x=(Math.random()-.5)*115,z=(Math.random()-.5)*130;if(Math.abs(x)<10||Math.abs(z)<9)continue;const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22,.35,2,7),mat(0x68472e));trunk.position.set(x,1,z);scene.add(trunk);const crown=new THREE.Mesh(new THREE.SphereGeometry(1.5,8,7),mat(0x416d46));crown.position.set(x,2.8,z);scene.add(crown)}
+// Player character
+const player=new THREE.Group();scene.add(player);
+const body=new THREE.Mesh(new THREE.CapsuleGeometry(.48,.9,4,8),mat(0x202d3a));body.position.y=1.25;body.castShadow=true;player.add(body);
+const head=new THREE.Mesh(new THREE.SphereGeometry(.34,12,10),mat(0xb9805e));head.position.y=2.15;player.add(head);
+const hair=new THREE.Mesh(new THREE.SphereGeometry(.35,12,8),mat(0x211c19));hair.scale.y=.48;hair.position.set(0,2.38,0);player.add(hair);
+const legs=new THREE.Mesh(new THREE.BoxGeometry(.72,.72,.42),mat(0x273d55));legs.position.y=.45;player.add(legs);player.position.set(2,0,22);
+// car
+const car=new THREE.Group();scene.add(car);car.position.set(5,0,15);
+const chassis=new THREE.Mesh(new THREE.BoxGeometry(2.5,.75,4.4),mat(0x9d2924));chassis.position.y=.85;chassis.castShadow=true;car.add(chassis);
+const cabin=new THREE.Mesh(new THREE.BoxGeometry(2.05,.9,2.1),mat(0x9fc5d1,.3));cabin.position.set(0,1.55,-.15);car.add(cabin);
+for(const x of [-1.05,1.05])for(const z of [-1.45,1.45]){const wh=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.25,16),mat(0x17191c));wh.rotation.z=Math.PI/2;wh.position.set(x,.48,z);car.add(wh)}
+let driving=false,cash=500;const keys={};let joy={x:0,y:0};
+function say(t){document.getElementById('toast').textContent=t}
+function toggleCar(){driving=!driving;if(driving){player.visible=false;player.position.copy(car.position);say('ئێستا ئۆتۆمبێلەکە لێبخوڕە!')}else{player.visible=true;player.position.set(car.position.x+2,0,car.position.z);say('لە ئۆتۆمبێلەکە هاتیتە خوارەوە.')}document.getElementById('carBtn').textContent=driving?'🚶 دابەزین لە ئۆتۆمبێل':'🚗 سواربوونی ئۆتۆمبێل'}
+document.getElementById('carBtn').addEventListener('click',toggleCar);
+document.getElementById('jobBtn').addEventListener('click',()=>{cash+=200;document.getElementById('cash').textContent=cash;say('ئافەرین! ٢٠٠ دینارت بەدەستهێنا.')});
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='e')toggleCar()});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+const stick=document.getElementById('stick'),knob=document.getElementById('knob');let active=false;
+function moveJoy(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,L=Math.hypot(dx,dy),max=39;if(L>max){dx=dx/L*max;dy=dy/L*max}joy.x=dx/max;joy.y=dy/max;knob.style.transform='translate('+dx+'px,'+dy+'px)'}
+stick.addEventListener('pointerdown',e=>{active=true;stick.setPointerCapture(e.pointerId);moveJoy(e)});stick.addEventListener('pointermove',e=>{if(active)moveJoy(e)});function stop(){active=false;joy={x:0,y:0};knob.style.transform='translate(0,0)'}stick.addEventListener('pointerup',stop);stick.addEventListener('pointercancel',stop);
+const clock=new THREE.Clock();let yaw=0;
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-joy.y;let side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+joy.x;
+if(driving){car.rotation.y-=side*dt*1.4;const dir=new THREE.Vector3(Math.sin(car.rotation.y),0,Math.cos(car.rotation.y));car.position.addScaledVector(dir,f*dt*13)}else{if(Math.abs(f)+Math.abs(side)>.05){yaw=Math.atan2(side,f);player.rotation.y=yaw;player.position.x+=Math.sin(yaw)*Math.min(1,Math.hypot(f,side))*dt*6;player.position.z+=Math.cos(yaw)*Math.min(1,Math.hypot(f,side))*dt*6}}
+const target=driving?car:player;const back=new THREE.Vector3(Math.sin(target.rotation.y)*-8,5.2,Math.cos(target.rotation.y)*-8);const desired=target.position.clone().add(back);camera.position.lerp(desired,.09);camera.lookAt(target.position.x,target.position.y+1.2,target.position.z);
+renderer.render(scene,camera)}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+loading.style.display='none';animate();
+</script>
+</body></html>
