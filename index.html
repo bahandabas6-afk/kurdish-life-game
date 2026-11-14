@@ -23,22 +23,27 @@ button:active{background:#d79c3e;color:#18232b}
 @media (orientation:portrait){#rotatePrompt{display:flex}}
 @media (orientation:landscape){#top{left:12px;right:12px}.pill{padding:6px 10px;font-size:12px}#help{top:58px;max-width:190px}#controls{bottom:calc(10px + env(safe-area-inset-bottom))}#stick{width:108px;height:108px}#knob{left:29px;top:29px}#toast{bottom:118px}}
 #loading{position:fixed;inset:0;display:grid;place-items:center;background:#101a26;font-size:18px;z-index:5}
+#pcHint{display:none;position:fixed;left:16px;bottom:16px;background:#102536d9;border:1px solid #ffffff33;border-radius:13px;padding:10px 14px;line-height:1.7;font-size:12px}
+#fullBtn{position:fixed;right:16px;bottom:16px;min-width:auto}
+@media (min-width:900px){#stick{display:none}#controls{left:auto;right:22px;bottom:22px}#actions{flex-direction:row}#help{max-width:270px;font-size:14px}#pcHint{display:block}#toast{bottom:90px;font-size:15px}#top{left:20px;right:20px;top:16px}.pill{padding:10px 16px;font-size:15px}}
+@media (max-width:899px){#fullBtn{display:none}}
 </style>
 </head>
 <body>
 <div id="game"></div><div id="rotatePrompt"><div class="card"><span class="phone">📱 ↻</span><strong>تکایە مۆبایلەکەت بە ئاسۆیی بگرە</strong><br>یارییەکە وەک GTA بە شێوەی Landscape باشترە. شاشەکە بسووڕێنە بۆ لای ئاسۆیی.</div></div><div id="loading">🎮 خەریکی بارکردنی ژیانی کوردی...</div>
 <div id="top"><div class="pill" id="brand">KURDISH LIFE | ژیانی کوردی</div><div class="pill">💵 <span id="cash">500</span> د.ع</div><div class="pill">📍 سلێمانی</div></div>
 <div id="help">ئاراس لە شاری سلێمانییە<br>جوڵە: جوڵاندنی بازنەکە یان WASD</div>
-<div id="controls"><div id="stick"><div id="knob"></div></div><div class="actions"><button id="carBtn">🚗 سواربوونی ئۆتۆمبێل</button><button id="jobBtn">🧰 کارکردن +200</button></div></div>
+<div id="controls"><div id="stick"><div id="knob"></div></div><div class="actions" id="actions"><button id="carBtn">🚗 سواربوونی ئۆتۆمبێل</button><button id="jobBtn">🧰 کارکردن +200</button></div></div>
+<div id="pcHint">⌨️ کۆنترۆڵی کۆمپیوتەر: WASD یان تیرەکان بۆ جوڵە · E سوار/دابەزین · Shift خێرایی</div><button id="fullBtn">⛶ شاشەی تەواو</button>
 <div id="toast">بەخێربێیت! شارەکە بگەڕێ و ئۆتۆمبێلەکە تاقی بکەرەوە.</div>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 const root=document.getElementById('game'),loading=document.getElementById('loading');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x9bc9df);scene.fog=new THREE.Fog(0x9bc9df,55,190);
 const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,300);
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;root.appendChild(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.outputColorSpace=THREE.SRGBColorSpace;root.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xd9efff,0x65704c,2));
-const sun=new THREE.DirectionalLight(0xffedce,2.3);sun.position.set(-35,55,25);sun.castShadow=true;scene.add(sun);
+const sun=new THREE.DirectionalLight(0xffedce,2.6);sun.position.set(-35,65,25);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-85;sun.shadow.camera.right=85;sun.shadow.camera.top=85;sun.shadow.camera.bottom=-85;sun.shadow.bias=-0.00025;scene.add(sun);
 const mat=(c,r=.85)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(260,260),mat(0x78915a));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 function box(x,y,z,sx,sy,sz,color){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat(color));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m}
@@ -67,12 +72,15 @@ function toggleCar(){driving=!driving;if(driving){player.visible=false;player.po
 document.getElementById('carBtn').addEventListener('click',toggleCar);
 document.getElementById('jobBtn').addEventListener('click',()=>{cash+=200;document.getElementById('cash').textContent=cash;say('ئافەرین! ٢٠٠ دینارت بەدەستهێنا.')});
 addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='e')toggleCar()});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+document.getElementById('fullBtn').addEventListener('click',()=>{if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>say('براوزەر ڕێگەی شاشەی تەواو نادات.'))});
+
 const stick=document.getElementById('stick'),knob=document.getElementById('knob');let active=false;
 function moveJoy(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,L=Math.hypot(dx,dy),max=39;if(L>max){dx=dx/L*max;dy=dy/L*max}joy.x=dx/max;joy.y=dy/max;knob.style.transform='translate('+dx+'px,'+dy+'px)'}
 stick.addEventListener('pointerdown',e=>{active=true;stick.setPointerCapture(e.pointerId);moveJoy(e)});stick.addEventListener('pointermove',e=>{if(active)moveJoy(e)});function stop(){active=false;joy={x:0,y:0};knob.style.transform='translate(0,0)'}stick.addEventListener('pointerup',stop);stick.addEventListener('pointercancel',stop);
 const clock=new THREE.Clock();let yaw=0;
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-joy.y;let side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+joy.x;
-if(driving){car.rotation.y-=side*dt*1.4;const dir=new THREE.Vector3(Math.sin(car.rotation.y),0,Math.cos(car.rotation.y));car.position.addScaledVector(dir,f*dt*13)}else{if(Math.abs(f)+Math.abs(side)>.05){yaw=Math.atan2(side,f);player.rotation.y=yaw;player.position.x+=Math.sin(yaw)*Math.min(1,Math.hypot(f,side))*dt*6;player.position.z+=Math.cos(yaw)*Math.min(1,Math.hypot(f,side))*dt*6}}
+const boost=keys.shift?1.65:1;
+if(driving){car.rotation.y-=side*dt*1.4;const dir=new THREE.Vector3(Math.sin(car.rotation.y),0,Math.cos(car.rotation.y));car.position.addScaledVector(dir,f*dt*13*boost)}else{if(Math.abs(f)+Math.abs(side)>.05){yaw=Math.atan2(side,f);player.rotation.y=yaw;player.position.x+=Math.sin(yaw)*Math.min(1,Math.hypot(f,side))*dt*6*boost;player.position.z+=Math.cos(yaw)*Math.min(1,Math.hypot(f,side))*dt*6*boost}}
 const target=driving?car:player;const back=new THREE.Vector3(Math.sin(target.rotation.y)*-8,5.2,Math.cos(target.rotation.y)*-8);const desired=target.position.clone().add(back);camera.position.lerp(desired,.09);camera.lookAt(target.position.x,target.position.y+1.2,target.position.z);
 renderer.render(scene,camera)}
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
