@@ -10,6 +10,7 @@ class KURDISHLIFE_API AKurdishLifeVehiclePawn : public APawn
 public:
     AKurdishLifeVehiclePawn();
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+    virtual void Tick(float DeltaSeconds) override;
 protected:
     void Throttle(float V);
     void Steer(float V);
