@@ -17,11 +17,16 @@
 button{border:1px solid #ffffff55;background:#183b50ed;color:white;border-radius:14px;padding:12px 15px;font-size:14px;font-weight:700;min-width:112px}
 button:active{background:#d79c3e;color:#18232b}
 #toast{position:fixed;bottom:155px;left:50%;transform:translateX(-50%);background:#102536e8;padding:9px 14px;border-radius:12px;font-size:13px;white-space:nowrap;max-width:90vw;text-align:center}
+#rotatePrompt{display:none;position:fixed;inset:0;z-index:8;background:#101a26f2;align-items:center;justify-content:center;text-align:center;padding:28px}
+#rotatePrompt .card{max-width:330px;background:#183b50;border:1px solid #ffffff44;border-radius:22px;padding:24px;line-height:1.8}
+#rotatePrompt .phone{font-size:54px;display:block;margin-bottom:10px}
+@media (orientation:portrait){#rotatePrompt{display:flex}}
+@media (orientation:landscape){#top{left:12px;right:12px}.pill{padding:6px 10px;font-size:12px}#help{top:58px;max-width:190px}#controls{bottom:calc(10px + env(safe-area-inset-bottom))}#stick{width:108px;height:108px}#knob{left:29px;top:29px}#toast{bottom:118px}}
 #loading{position:fixed;inset:0;display:grid;place-items:center;background:#101a26;font-size:18px;z-index:5}
 </style>
 </head>
 <body>
-<div id="game"></div><div id="loading">🎮 خەریکی بارکردنی ژیانی کوردی...</div>
+<div id="game"></div><div id="rotatePrompt"><div class="card"><span class="phone">📱 ↻</span><strong>تکایە مۆبایلەکەت بە ئاسۆیی بگرە</strong><br>یارییەکە وەک GTA بە شێوەی Landscape باشترە. شاشەکە بسووڕێنە بۆ لای ئاسۆیی.</div></div><div id="loading">🎮 خەریکی بارکردنی ژیانی کوردی...</div>
 <div id="top"><div class="pill" id="brand">KURDISH LIFE | ژیانی کوردی</div><div class="pill">💵 <span id="cash">500</span> د.ع</div><div class="pill">📍 سلێمانی</div></div>
 <div id="help">ئاراس لە شاری سلێمانییە<br>جوڵە: جوڵاندنی بازنەکە یان WASD</div>
 <div id="controls"><div id="stick"><div id="knob"></div></div><div class="actions"><button id="carBtn">🚗 سواربوونی ئۆتۆمبێل</button><button id="jobBtn">🧰 کارکردن +200</button></div></div>
