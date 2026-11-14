@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ku" dir="rtl">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ژیانی کوردی | Kurdish Life</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101b25;color:#fff;font-family:system-ui,sans-serif}header{padding:16px;background:#183447;text-align:center}h1{margin:0;font-size:25px}main{max-width:760px;margin:auto;padding:14px}.panel{background:#203442;border:1px solid #456071;border-radius:16px;padding:14px;margin:12px 0}.stats{display:flex;gap:8px;justify-content:space-around;flex-wrap:wrap}.stat{background:#122633;padding:10px 14px;border-radius:12px}.town{height:230px;border-radius:14px;background:linear-gradient(#76b6d2 0 48%,#8caa65 48% 100%);position:relative;overflow:hidden}.road{position:absolute;bottom:0;left:0;width:100%;height:75px;background:#444}.road:after{content:"";position:absolute;top:35px;left:0;width:100%;border-top:4px dashed #f5e7a3}.house{position:absolute;bottom:75px;width:90px;height:78px;background:#d9b17d;border:4px solid #76583c}.house:before{content:"";position:absolute;top:-34px;left:-8px;border-left:49px solid transparent;border-right:49px solid transparent;border-bottom:36px solid #814d3d}.house.one{right:12%}.house.two{left:14%;transform:scale(.8)}.player{position:absolute;bottom:77px;left:48%;font-size:40px}.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}button{border:0;border-radius:12px;padding:13px;background:#e2a84b;color:#18232b;font-size:16px;font-weight:700}button:active{transform:scale(.98)}#msg{min-height:48px;line-height:1.7}
+</style>
+<header><h1>ژیانی کوردی</h1><div>KURDISH LIFE — ژیان لە شارەکانی کوردستان</div></header>
+<main><div class="panel stats"><div class="stat">💵 پارە: <b id="money">500</b> د.ع</div><div class="stat">⚡ وزە: <b id="energy">100</b>%</div><div class="stat">📍 شوێن: سلێمانی</div></div>
+<div class="town"><div class="house one"></div><div class="house two"></div><div class="road"></div><div class="player">🧍🏻‍♂️</div></div>
+<div class="panel"><h3>بەخێربێیت بۆ ژیانی کوردی!</h3><p id="msg">ئاراس لە سلێمانییە. کار بکە، پارە کۆبکەرەوە و شار بناسە.</p></div>
+<div class="panel"><h3>کار و چالاکییەکان</h3><div class="actions"><button onclick="work()">🧰 کارکردن (+200)</button><button onclick="walk()">🚶 گەشت لە شار</button><button onclick="eat()">🍞 نان خواردن (-50)</button><button onclick="travel()">🚗 چوون بۆ هەولێر (-100)</button></div></div>
+</main>
+<script>
+let money=500,energy=100,place='سلێمانی';function say(t){document.getElementById('msg').textContent=t;document.getElementById('money').textContent=money;document.getElementById('energy').textContent=energy;document.querySelector('.stats .stat:last-child').textContent='📍 شوێن: '+place}
+function work(){if(energy<20)return say('وزەت کەمە؛ سەرەتا نان بخۆ.');money+=200;energy=Math.max(0,energy-20);say('ئافەرین! کارت کرد و ٢٠٠ دینارت بەدەستهێنا.')}
+function walk(){energy=Math.max(0,energy-10);say('لە '+place+' گەڕایت؛ شار جوانە و خەڵک خەریکی ژیانن.')}
+function eat(){if(money<50)return say('پارەت بەس نییە بۆ نان.');money-=50;energy=Math.min(100,energy+35);say('نانت خوارد و وزەت گەڕایەوە.')}
+function travel(){if(money<100)return say('پارەت بەس نییە بۆ گەشت.');money-=100;place=place==='سلێمانی'?'هەولێر':'سلێمانی';say('گەشتت کرد بۆ '+place+'!')}
+</script></html>
