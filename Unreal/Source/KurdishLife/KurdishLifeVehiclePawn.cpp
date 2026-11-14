@@ -30,6 +30,14 @@ void AKurdishLifeVehiclePawn::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("VehicleBrake",IE_Pressed,this,&AKurdishLifeVehiclePawn::BrakePressed);
     Input->BindAction("VehicleBrake",IE_Released,this,&AKurdishLifeVehiclePawn::BrakeReleased);
 }
+void AKurdishLifeVehiclePawn::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+    const float Drag = bBraking ? 5.0f : 0.35f;
+    Speed = FMath::FInterpTo(Speed, 0.0f, DeltaSeconds, Drag);
+    AddActorLocalRotation(FRotator(0.0f, Steering * FMath::Clamp(FMath::Abs(Speed)/500.0f,0.0f,1.0f) * 75.0f * DeltaSeconds, 0.0f));
+    AddActorLocalOffset(FVector(Speed * DeltaSeconds,0,0), true);
+}
 void AKurdishLifeVehiclePawn::Throttle(float V){Speed=FMath::Clamp(Speed+V*(bBraking?8.0f:18.0f),-500.0f,1600.0f);}
 void AKurdishLifeVehiclePawn::Steer(float V){Steering=V;}
 void AKurdishLifeVehiclePawn::BrakePressed(){bBraking=true;}
