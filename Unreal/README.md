@@ -1,21 +1,15 @@
 # Kurdish Life — Unreal Engine starter
 
-This folder is the C++ foundation for a third-person open-world project.
+Open `KurdishLife.uproject` in Unreal Engine 5. The C++ module provides a third-person character, spring-arm camera, WASD/mouse controls and Shift sprint.
+
+## City prototype
+Add an actor of class `KurdishLifeCityBuilder` to a level. It procedurally lays out a simple grid of roads and placeholder building masses. Adjust block count, spacing and random seed in Details. This is a greybox layout, not a finished detailed Sulaymaniyah map.
+
+## Vehicle prototype
+`KurdishLifeVehiclePawn` is an early placeholder vehicle pawn with basic arcade movement. Place it in a level and possess it from a PlayerController/Blueprint. Configure axes `VehicleThrottle` (W +1, S -1), `VehicleSteer` (D +1, A -1), and action `VehicleBrake` (Space). Full vehicle physics, wheels, suspension, entry/exit and traffic AI are not implemented.
 
 ## Requirements
-- Unreal Engine 5.4 (or a compatible UE5 release)
-- Visual Studio 2022 with the C++ game development workload on Windows
+- Unreal Engine 5.4 or compatible UE5
+- Visual Studio 2022 with C++ game development components
 
-## Included
-- Unreal project descriptor and C++ runtime module
-- Third-person character with spring-arm follow camera
-- WASD movement, mouse look, and Shift sprint (after setting the matching input mappings)
-
-## First editor setup
-1. Open `KurdishLife.uproject` in Unreal Engine.
-2. Allow the IDE project files to generate and compile the C++ module.
-3. Create a Blueprint based on `KurdishLifeCharacter`.
-4. Set that Blueprint as the Default Pawn in a GameMode.
-5. In Project Settings → Input, add axes `MoveForward` (W=+1, S=-1), `MoveRight` (D=+1, A=-1), `Turn` (Mouse X=+1), `LookUp` (Mouse Y=-1), and action `Sprint` (Left Shift).
-
-This is a starter foundation, not a finished GTA-scale game. It does not yet include a detailed city, vehicles, missions, character assets, or mobile packaging. Those require additional development and licensed/created assets.
+This is a starter codebase, not a finished game. Detailed city art, character/car assets, missions, NPCs, sound, mobile controls and packaged builds remain to be developed.
