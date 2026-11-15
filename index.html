@@ -30,7 +30,7 @@ button:active{background:#e4b653;color:#18251d}
 const canvas=document.getElementById('world'),ctx=canvas.getContext('2d');
 let W=0,H=0,dpr=1;
 function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
-const world={w:2400,h:2400},player={x:1200,y:1200,a:0},car={x:1280,y:1200,a:0},keys={};let driving=false,cash=500,joy={x:0,y:0},toastTimer=0,walking=false,walkPhase=0;
+const world={w:2400,h:2400},player={x:1200,y:1200,a:0},car={x:1280,y:1200,a:0},keys={};let driving=false,cash=500,joy={x:0,y:0},toastTimer=0,walking=false,walkPhase=0,cameraX=1200,cameraY=1200;
 function say(s){document.getElementById('toast').textContent=s;toastTimer=3}
 const buildings=[],trees=[];
 for(let gx=0;gx<10;gx++)for(let gy=0;gy<10;gy++){
@@ -81,7 +81,9 @@ function drawPerson(x,y,a,moving,phase){
 }
 function render(){
  const target=driving?car:player,cx=Math.max(W/2,Math.min(world.w-W/2,target.x)),cy=Math.max(H/2,Math.min(world.h-H/2,target.y));
- ctx.clearRect(0,0,W,H);ctx.save();ctx.translate(W/2-cx,H/2-cy);
+ // Smooth automatic camera follow: keep Aras (or the car) centered while moving.
+ cameraX+=(cx-cameraX)*0.14;cameraY+=(cy-cameraY)*0.14;
+ ctx.clearRect(0,0,W,H);ctx.save();ctx.translate(W/2-cameraX,H/2-cameraY);
  ctx.fillStyle='#718b55';ctx.fillRect(0,0,world.w,world.h);
  // city street grid
  ctx.fillStyle='#3a4140';for(let x=0;x<world.w;x+=240)ctx.fillRect(x-24,0,48,world.h);for(let y=0;y<world.h;y+=240)ctx.fillRect(0,y-24,world.w,48);
