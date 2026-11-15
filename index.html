@@ -9,7 +9,7 @@ canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 #hud{position:fixed;inset:env(safe-area-inset-top,8px) 9px auto;display:flex;justify-content:space-between;gap:7px;pointer-events:none;flex-wrap:wrap}
 .pill{background:#12271ee8;border:1px solid #ffffff38;border-radius:12px;padding:7px 10px;font-size:12px;box-shadow:0 3px 12px #0005}
 #brand{font-weight:900;font-size:14px}#help{position:fixed;top:58px;right:10px;background:#12271edb;padding:7px 10px;border-radius:10px;font-size:11px;line-height:1.5;pointer-events:none}
-#controls{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;right:12px;display:flex;justify-content:space-between;align-items:end;pointer-events:none}
+#controls{position:fixed;direction:ltr;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;right:12px;display:flex;justify-content:space-between;align-items:end;pointer-events:none}
 #stick{width:116px;height:116px;border-radius:50%;background:#142d24b8;border:2px solid #ffffff70;position:relative;pointer-events:auto;touch-action:none}
 #knob{position:absolute;width:46px;height:46px;left:33px;top:33px;border-radius:50%;background:#e4b653;border:2px solid white}
 .actions{display:flex;flex-direction:column;gap:8px;pointer-events:auto}
@@ -30,7 +30,7 @@ button:active{background:#e4b653;color:#18251d}
 const canvas=document.getElementById('world'),ctx=canvas.getContext('2d');
 let W=0,H=0,dpr=1;
 function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
-const world={w:2400,h:2400},player={x:1200,y:1200,a:0},car={x:1280,y:1200,a:0},keys={};let driving=false,cash=500,joy={x:0,y:0},toastTimer=0;
+const world={w:2400,h:2400},player={x:1200,y:1200,a:0},car={x:1280,y:1200,a:0},keys={};let driving=false,cash=500,joy={x:0,y:0},toastTimer=0,walking=false,walkPhase=0;
 function say(s){document.getElementById('toast').textContent=s;toastTimer=3}
 const buildings=[],trees=[];
 for(let gx=0;gx<10;gx++)for(let gy=0;gy<10;gy++){
@@ -42,7 +42,7 @@ for(let gx=0;gx<10;gx++)for(let gy=0;gy<10;gy++){
 for(let i=0;i<190;i++)trees.push({x:Math.random()*world.w,y:Math.random()*world.h,r:8+Math.random()*7});
 function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
 function drawCar(x,y,a){ctx.save();ctx.translate(x,y);ctx.rotate(a);rounded(-18,-10,36,20,6,'#9e2d27');rounded(-9,-8,19,16,4,'#a9d2d9');ctx.fillStyle='#171b1b';ctx.fillRect(-13,-13,8,4);ctx.fillRect(6,-13,8,4);ctx.fillRect(-13,9,8,4);ctx.fillRect(6,9,8,4);ctx.restore()}
-function drawPerson(x,y,a){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.fillStyle='#202d3a';ctx.beginPath();ctx.ellipse(0,2,9,12,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#c58b68';ctx.beginPath();ctx.arc(0,-9,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#211c19';ctx.beginPath();ctx.arc(0,-12,7,Math.PI,Math.PI*2);ctx.fill();ctx.restore()}
+function drawPerson(x,y,a,moving,phase){ctx.save();ctx.translate(x,y);ctx.rotate(a);const swing=moving?Math.sin(phase)*5:0;ctx.lineCap='round';ctx.lineWidth=4;ctx.strokeStyle='#273d55';ctx.beginPath();ctx.moveTo(-4,8);ctx.lineTo(-5-swing,17);ctx.moveTo(4,8);ctx.lineTo(5+swing,17);ctx.stroke();ctx.strokeStyle='#202d3a';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-7,-1);ctx.lineTo(-11+swing*.45,7);ctx.moveTo(7,-1);ctx.lineTo(11-swing*.45,7);ctx.stroke();ctx.fillStyle='#202d3a';ctx.beginPath();ctx.ellipse(0,1,9,11,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#c58b68';ctx.beginPath();ctx.arc(0,-10,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#211c19';ctx.beginPath();ctx.arc(0,-13,7,Math.PI,Math.PI*2);ctx.fill();ctx.restore()}
 function render(){
  const target=driving?car:player,cx=Math.max(W/2,Math.min(world.w-W/2,target.x)),cy=Math.max(H/2,Math.min(world.h-H/2,target.y));
  ctx.clearRect(0,0,W,H);ctx.save();ctx.translate(W/2-cx,H/2-cy);
@@ -58,7 +58,7 @@ function render(){
  for(const b of buildings){ctx.fillStyle='#0004';ctx.fillRect(b.x+7,b.y+9,b.w,b.h);ctx.fillStyle=b.c;ctx.fillRect(b.x,b.y,b.w,b.h);ctx.fillStyle=b.roof;ctx.fillRect(b.x-3,b.y-4,b.w+6,12);ctx.fillStyle='#6d9aa2';for(let xx=b.x+15;xx<b.x+b.w-8;xx+=31)for(let yy=b.y+23;yy<b.y+b.h-10;yy+=34)ctx.fillRect(xx,yy,13,16);ctx.fillStyle='#73533b';ctx.fillRect(b.x+b.w/2-8,b.y+b.h-22,16,22)}
  // minimap-style destination marker and car/player
  ctx.fillStyle='#f1d16c';ctx.beginPath();ctx.arc(1200,1200,18,0,Math.PI*2);ctx.fill();ctx.fillStyle='#344';ctx.font='bold 12px system-ui';ctx.fillText('SULAYMANIYAH',1150,1165);
- drawCar(car.x,car.y,car.a);if(!driving)drawPerson(player.x,player.y,player.a);
+ drawCar(car.x,car.y,car.a);if(!driving)drawPerson(player.x,player.y,player.a,walking,walkPhase);
  ctx.restore();
  // subtle vignette
  const g=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.25,W/2,H/2,Math.max(W,H)*.72);g.addColorStop(0,'#0000');g.addColorStop(1,'#07110b55');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
@@ -67,7 +67,7 @@ function render(){
 let last=performance.now();
 function update(now){let dt=Math.min((now-last)/1000,.04);last=now;
  let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-joy.y,side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+joy.x;
- let t=driving?car:player,speed=driving?260:175,mag=Math.hypot(f,side);if(mag>.08){let dx=side/mag,dy=-f/mag;t.a=Math.atan2(dy,dx)+Math.PI/2;t.x+=dx*speed*dt;t.y+=dy*speed*dt;t.x=Math.max(30,Math.min(world.w-30,t.x));t.y=Math.max(30,Math.min(world.h-30,t.y))}
+ let t=driving?car:player,speed=driving?260:175,mag=Math.hypot(f,side);walking=!driving&&mag>.08;if(walking)walkPhase+=dt*11;if(mag>.08){let dx=side/mag,dy=-f/mag;t.a=Math.atan2(dy,dx)+Math.PI/2;t.x+=dx*speed*dt;t.y+=dy*speed*dt;t.x=Math.max(30,Math.min(world.w-30,t.x));t.y=Math.max(30,Math.min(world.h-30,t.y))}
  requestAnimationFrame(update)}
 function toggleCar(){let d=Math.hypot(player.x-car.x,player.y-car.y);if(!driving&&d>90){say('نزیک ئۆتۆمبێلەکە ببە بۆ سواربوون');return}driving=!driving;if(driving){player.x=car.x;player.y=car.y;say('سوار بوویت! بە بازنەکە ئۆتۆمبێل لێبخوڕە.')}else{player.x=car.x+45;player.y=car.y+8;say('لە ئۆتۆمبێلەکە هاتیتە خوارەوە.')}document.getElementById('carBtn').textContent=driving?'🚶 دابەزین':'🚗 سواربوونی ئۆتۆمبێل'}
 document.getElementById('carBtn').onclick=toggleCar;document.getElementById('jobBtn').onclick=()=>{cash+=200;document.getElementById('cash').textContent=cash;say('ئافەرین! ٢٠٠ دینارت بەدەستهێنا.')};
