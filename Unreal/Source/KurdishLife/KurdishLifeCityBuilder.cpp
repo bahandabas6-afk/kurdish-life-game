@@ -33,15 +33,23 @@ void AKurdishLifeCityBuilder::OnConstruction(const FTransform& Transform)
     if (!Cube) return;
 
     auto* Roads = MakeInstances(TEXT("RoadInstances"), Cube, FTransform::Identity);
-    auto* Sidewalks = MakeInstances(TEXT("SidewalkInstances"), Cube, FTransform::Identity);
+    auto* Sidewalks = bGenerateSidewalks ? MakeInstances(TEXT("SidewalkInstances"), Cube, FTransform::Identity) : nullptr;
     auto* Buildings = MakeInstances(TEXT("BuildingInstances"), Cube, FTransform::Identity);
-    auto* Ground = MakeInstances(TEXT("GroundInstances"), Cube, FTransform::Identity);
-    auto* StreetLightPoles = Cylinder ? MakeInstances(TEXT("StreetLightPoles"), Cylinder, FTransform::Identity) : nullptr;
-    auto* StreetLightHeads = Cylinder ? MakeInstances(TEXT("StreetLightHeads"), Cylinder, FTransform::Identity) : nullptr;
+    auto* Ground = bGenerateGround ? MakeInstances(TEXT("GroundInstances"), Cube, FTransform::Identity) : nullptr;
+    auto* StreetLightPoles = (bGenerateStreetLights && Cylinder) ? MakeInstances(TEXT("StreetLightPoles"), Cylinder, FTransform::Identity) : nullptr;
+    auto* StreetLightHeads = (bGenerateStreetLights && Cylinder) ? MakeInstances(TEXT("StreetLightHeads"), Cylinder, FTransform::Identity) : nullptr;
+
+    if (GroundMaterial && Ground) Ground->SetMaterial(0, GroundMaterial);
+    if (RoadMaterial) Roads->SetMaterial(0, RoadMaterial);
+    if (SidewalkMaterial && Sidewalks) Sidewalks->SetMaterial(0, SidewalkMaterial);
+    if (BuildingMaterial) Buildings->SetMaterial(0, BuildingMaterial);
+    if (StreetLightPoleMaterial && StreetLightPoles) StreetLightPoles->SetMaterial(0, StreetLightPoleMaterial);
+    if (StreetLightHeadMaterial && StreetLightHeads) StreetLightHeads->SetMaterial(0, StreetLightHeadMaterial);
 
     const float Half = BlocksPerSide * BlockSpacing * 0.5f;
     const float CityScale = Half / 50.0f; // Cube mesh is 100 cm wide.
-    Ground->AddInstance(FTransform(FRotator::ZeroRotator, FVector(0,0,-65), FVector(CityScale,CityScale,0.1f)));
+    if (Ground)
+        Ground->AddInstance(FTransform(FRotator::ZeroRotator, FVector(0,0,-65), FVector(CityScale,CityScale,0.1f)));
 
     // Broad road strips at each grid line; the perpendicular axis spans the whole district.
     for (int32 I=0; I<=BlocksPerSide; ++I)
@@ -51,10 +59,13 @@ void AKurdishLifeCityBuilder::OnConstruction(const FTransform& Transform)
         Roads->AddInstance(FTransform(FRotator::ZeroRotator,FVector(0,P,-8),FVector(CityScale,3.0f,0.08f)));
 
         // Raised sidewalks alongside each road.
-        for (float Side : {-1.0f, 1.0f})
+        if (Sidewalks)
         {
-            Sidewalks->AddInstance(FTransform(FRotator::ZeroRotator,FVector(P+Side*380.0f,0,8),FVector(1.0f,CityScale,0.12f)));
-            Sidewalks->AddInstance(FTransform(FRotator::ZeroRotator,FVector(0,P+Side*380.0f,8),FVector(CityScale,1.0f,0.12f)));
+            for (float Side : {-1.0f, 1.0f})
+            {
+                Sidewalks->AddInstance(FTransform(FRotator::ZeroRotator,FVector(P+Side*380.0f,0,8),FVector(1.0f,CityScale,0.12f)));
+                Sidewalks->AddInstance(FTransform(FRotator::ZeroRotator,FVector(0,P+Side*380.0f,8),FVector(CityScale,1.0f,0.12f)));
+            }
         }
 
         // Repeated street lights make the greybox streets easier to read at scale.
@@ -78,16 +89,21 @@ void AKurdishLifeCityBuilder::OnConstruction(const FTransform& Transform)
     }
 
     FRandomStream R(RandomSeed);
+    const int32 MinCount = FMath::Clamp(FMath::Min(MinBuildingsPerBlock, MaxBuildingsPerBlock), 0, 20);
+    const int32 MaxCount = FMath::Clamp(FMath::Max(MinBuildingsPerBlock, MaxBuildingsPerBlock), MinCount, 20);
+    const float MinHeight = FMath::Max(100.0f, FMath::Min(MinBuildingHeightCm, MaxBuildingHeightCm));
+    const float MaxHeight = FMath::Max(MinHeight, FMath::Max(MinBuildingHeightCm, MaxBuildingHeightCm));
+
     for (int32 X=0; X<BlocksPerSide; ++X)
     for (int32 Y=0; Y<BlocksPerSide; ++Y)
     {
         const FVector Center(-Half+(X+0.5f)*BlockSpacing,-Half+(Y+0.5f)*BlockSpacing,0);
-        const int32 Count=R.RandRange(3,6);
+        const int32 Count=R.RandRange(MinCount,MaxCount);
         for(int32 B=0; B<Count; ++B)
         {
             const float W=R.FRandRange(180,340);
             const float D=R.FRandRange(180,340);
-            const float H=R.FRandRange(220,1250);
+            const float H=R.FRandRange(MinHeight,MaxHeight);
             const FVector Offset(R.FRandRange(-300,300),R.FRandRange(-300,300),H*0.5f);
             Buildings->AddInstance(FTransform(FRotator(0,R.FRandRange(-4,4),0),Center+Offset,FVector(W/100.0f,D/100.0f,H/100.0f)));
         }
