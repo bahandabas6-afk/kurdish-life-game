@@ -3,6 +3,8 @@
 #include "GameFramework/Character.h"
 #include "KurdishLifeCharacter.generated.h"
 
+class UStaticMeshComponent;
+
 UCLASS()
 class KURDISHLIFE_API AKurdishLifeCharacter : public ACharacter
 {
@@ -22,6 +24,23 @@ private:
     class USpringArmComponent* CameraBoom;
     UPROPERTY(VisibleAnywhere, Category="Camera")
     class UCameraComponent* FollowCamera;
+
+    // Simple engine-shape proxy so the character is visible before custom art is added.
+    UPROPERTY(VisibleAnywhere, Category="Preview")
+    UStaticMeshComponent* PreviewTorso;
+    UPROPERTY(VisibleAnywhere, Category="Preview")
+    UStaticMeshComponent* PreviewHead;
+    UPROPERTY(VisibleAnywhere, Category="Preview")
+    UStaticMeshComponent* PreviewLeftArm;
+    UPROPERTY(VisibleAnywhere, Category="Preview")
+    UStaticMeshComponent* PreviewRightArm;
+    UPROPERTY(VisibleAnywhere, Category="Preview")
+    UStaticMeshComponent* PreviewLeftLeg;
+    UPROPERTY(VisibleAnywhere, Category="Preview")
+    UStaticMeshComponent* PreviewRightLeg;
+    UPROPERTY(VisibleAnywhere, Category="Preview")
+    UStaticMeshComponent* PreviewFeet;
+
     UPROPERTY(EditAnywhere, Category="Movement")
     float WalkSpeed = 500.0f;
     UPROPERTY(EditAnywhere, Category="Movement")
