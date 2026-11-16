@@ -68,6 +68,8 @@ Place a `KurdishLifeVehiclePawn` in the level and set up possession from a Playe
 
 The current milestone is a **source-only Unreal starter** with a visible primitive character proxy and a procedural city greybox generator. It is not GTA-scale, and this repository has not been compiled or opened in Unreal in this environment. No screenshot, rendered level, executable, Windows package, or iOS/Android build has been produced or verified.
 
+Source review on 2026-11-16: the city builder's generated-component cleanup loop was changed to iterate its `TObjectPtr` array directly, avoiding pointer-deduction ambiguity. This is a source-level correction only; it still needs a Development Editor build in Unreal Engine 5.4.
+
 Still required for a convincing demo: compile and editor verification on Windows; save and review the first `.umap`; custom Aras character mesh, rig and animation; authored Sulaymaniyah buildings, roads, signs and materials; reliable vehicle possession/entry/exit; NPCs and traffic; job/mission UI and save persistence; audio; and mobile touch controls plus platform-specific packaging and testing.
 
 ## Repository
