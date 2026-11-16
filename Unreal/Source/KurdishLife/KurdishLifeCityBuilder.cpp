@@ -9,7 +9,10 @@ AKurdishLifeCityBuilder::AKurdishLifeCityBuilder()
 }
 void AKurdishLifeCityBuilder::ClearGenerated()
 {
-    for (auto* C : GeneratedMeshes) if (C) C->DestroyComponent();
+    for (auto& Component : GeneratedMeshes)
+    {
+        if (Component) Component->DestroyComponent();
+    }
     GeneratedMeshes.Reset();
 }
 UInstancedStaticMeshComponent* AKurdishLifeCityBuilder::MakeInstances(const TCHAR* Name, UStaticMesh* Mesh, const FTransform& Relative)
