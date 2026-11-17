@@ -54,20 +54,25 @@ void AKurdishLifeCityBuilder::OnConstruction(const FTransform& Transform)
     if (Ground)
         Ground->AddInstance(FTransform(FRotator::ZeroRotator, FVector(0,0,-65), FVector(CityScale,CityScale,0.1f)));
 
+    // Keep road, sidewalk and plot dimensions proportional to the editable block spacing.
+    const float RoadHalfWidth = FMath::Clamp(BlockSpacing * 0.12f, 90.0f, 180.0f);
+    const float SidewalkOffset = RoadHalfWidth + 75.0f;
+    const float MaxBuildingOffset = FMath::Max(0.0f, BlockSpacing * 0.5f - SidewalkOffset - 35.0f - 100.0f - 15.0f);
+
     // Broad road strips at each grid line; the perpendicular axis spans the whole district.
     for (int32 I=0; I<=BlocksPerSide; ++I)
     {
         const float P = -Half + I*BlockSpacing;
-        Roads->AddInstance(FTransform(FRotator::ZeroRotator,FVector(P,0,-8),FVector(3.0f,CityScale,0.08f)));
-        Roads->AddInstance(FTransform(FRotator::ZeroRotator,FVector(0,P,-8),FVector(CityScale,3.0f,0.08f)));
+        Roads->AddInstance(FTransform(FRotator::ZeroRotator,FVector(P,0,-8),FVector(RoadHalfWidth/50.0f,CityScale,0.08f)));
+        Roads->AddInstance(FTransform(FRotator::ZeroRotator,FVector(0,P,-8),FVector(CityScale,RoadHalfWidth/50.0f,0.08f)));
 
         // Raised sidewalks alongside each road.
         if (Sidewalks)
         {
             for (float Side : {-1.0f, 1.0f})
             {
-                Sidewalks->AddInstance(FTransform(FRotator::ZeroRotator,FVector(P+Side*380.0f,0,8),FVector(1.0f,CityScale,0.12f)));
-                Sidewalks->AddInstance(FTransform(FRotator::ZeroRotator,FVector(0,P+Side*380.0f,8),FVector(CityScale,1.0f,0.12f)));
+                Sidewalks->AddInstance(FTransform(FRotator::ZeroRotator,FVector(P+Side*SidewalkOffset,0,8),FVector(0.7f,CityScale,0.12f)));
+                Sidewalks->AddInstance(FTransform(FRotator::ZeroRotator,FVector(0,P+Side*SidewalkOffset,8),FVector(CityScale,0.7f,0.12f)));
             }
         }
 
@@ -79,8 +84,8 @@ void AKurdishLifeCityBuilder::OnConstruction(const FTransform& Transform)
                 const float Along = -Half + (L+0.5f)*BlockSpacing;
                 for (float Side : {-1.0f, 1.0f})
                 {
-                    const FVector A(P+Side*470.0f, Along, 0);
-                    const FVector B(Along, P+Side*470.0f, 0);
+                    const FVector A(P+Side*SidewalkOffset, Along, 0);
+                    const FVector B(Along, P+Side*SidewalkOffset, 0);
                     for (const FVector& Base : {A,B})
                     {
                         StreetLightPoles->AddInstance(FTransform(FRotator::ZeroRotator,Base+FVector(0,0,230),FVector(0.10f,0.10f,2.3f)));
@@ -104,10 +109,10 @@ void AKurdishLifeCityBuilder::OnConstruction(const FTransform& Transform)
         const int32 Count=R.RandRange(MinCount,MaxCount);
         for(int32 B=0; B<Count; ++B)
         {
-            const float W=R.FRandRange(180,340);
-            const float D=R.FRandRange(180,340);
+            const float W=R.FRandRange(140,200);
+            const float D=R.FRandRange(140,200);
             const float H=R.FRandRange(MinHeight,MaxHeight);
-            const FVector Offset(R.FRandRange(-300,300),R.FRandRange(-300,300),H*0.5f);
+            const FVector Offset(R.FRandRange(-MaxBuildingOffset,MaxBuildingOffset),R.FRandRange(-MaxBuildingOffset,MaxBuildingOffset),H*0.5f);
             Buildings->AddInstance(FTransform(FRotator(0,R.FRandRange(-4,4),0),Center+Offset,FVector(W/100.0f,D/100.0f,H/100.0f)));
         }
     }
