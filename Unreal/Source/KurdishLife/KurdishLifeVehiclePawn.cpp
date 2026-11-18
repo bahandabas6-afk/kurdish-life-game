@@ -33,12 +33,36 @@ void AKurdishLifeVehiclePawn::SetupPlayerInputComponent(UInputComponent* Input)
 void AKurdishLifeVehiclePawn::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-    const float Drag = bBraking ? 5.0f : 0.35f;
-    Speed = FMath::FInterpTo(Speed, 0.0f, DeltaSeconds, Drag);
-    AddActorLocalRotation(FRotator(0.0f, Steering * FMath::Clamp(FMath::Abs(Speed)/500.0f,0.0f,1.0f) * 75.0f * DeltaSeconds, 0.0f));
-    AddActorLocalOffset(FVector(Speed * DeltaSeconds,0,0), true);
+
+    // Apply acceleration in units per second so handling is less dependent on frame rate.
+    if (bBraking)
+    {
+        Speed = FMath::FInterpTo(Speed, 0.0f, DeltaSeconds, 6.0f);
+    }
+    else if (!FMath::IsNearlyZero(ThrottleInput))
+    {
+        const float Acceleration = ThrottleInput > 0.0f ? 900.0f : 650.0f;
+        Speed += ThrottleInput * Acceleration * DeltaSeconds;
+    }
+    else
+    {
+        Speed = FMath::FInterpTo(Speed, 0.0f, DeltaSeconds, 0.35f);
+    }
+
+    Speed = FMath::Clamp(Speed, -500.0f, 1600.0f);
+
+    const float SpeedRatio = FMath::Clamp(FMath::Abs(Speed) / 500.0f, 0.0f, 1.0f);
+    const float TravelDirection = FMath::Sign(Speed);
+    AddActorLocalRotation(FRotator(0.0f, Steering * TravelDirection * SpeedRatio * 75.0f * DeltaSeconds, 0.0f));
+    AddActorLocalOffset(FVector(Speed * DeltaSeconds, 0.0f, 0.0f), true);
 }
-void AKurdishLifeVehiclePawn::Throttle(float V){Speed=FMath::Clamp(Speed+V*(bBraking?8.0f:18.0f),-500.0f,1600.0f);}
-void AKurdishLifeVehiclePawn::Steer(float V){Steering=V;}
+void AKurdishLifeVehiclePawn::Throttle(float V)
+{
+    ThrottleInput = FMath::Clamp(V, -1.0f, 1.0f);
+}
+void AKurdishLifeVehiclePawn::Steer(float V)
+{
+    Steering = FMath::Clamp(V, -1.0f, 1.0f);
+}
 void AKurdishLifeVehiclePawn::BrakePressed(){bBraking=true;}
 void AKurdishLifeVehiclePawn::BrakeReleased(){bBraking=false;}
