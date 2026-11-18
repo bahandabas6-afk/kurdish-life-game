@@ -25,5 +25,6 @@ private:
     class UCameraComponent* FollowCamera;
     float Speed = 0.0f;
     float Steering = 0.0f;
+    float ThrottleInput = 0.0f;
     bool bBraking = false;
 };
