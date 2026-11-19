@@ -16,8 +16,16 @@ bool UKurdishLifeProgressionComponent::SpendMoney(int32 Amount)
 void UKurdishLifeProgressionComponent::AddMoney(int32 Amount)
 {
     if (Amount <= 0) return;
-    Money += Amount;
-    OnMoneyChanged.Broadcast(Money, Amount);
+
+    // Keep the wallet inside the int32 range and report only the amount actually credited.
+    const int64 CurrentBalance = FMath::Clamp<int64>(static_cast<int64>(Money), 0, MAX_int32);
+    const int64 NewBalance = FMath::Min<int64>(CurrentBalance + static_cast<int64>(Amount), MAX_int32);
+    const int32 AppliedAmount = static_cast<int32>(NewBalance - CurrentBalance);
+
+    if (Money == static_cast<int32>(NewBalance)) return;
+
+    Money = static_cast<int32>(NewBalance);
+    OnMoneyChanged.Broadcast(Money, AppliedAmount);
 }
 
 bool UKurdishLifeProgressionComponent::StartJob(const FString& JobName)
