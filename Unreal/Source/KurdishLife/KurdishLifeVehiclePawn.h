@@ -11,6 +11,7 @@ public:
     AKurdishLifeVehiclePawn();
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
     virtual void Tick(float DeltaSeconds) override;
+    virtual void UnPossessed() override;
 protected:
     void Throttle(float V);
     void Steer(float V);
