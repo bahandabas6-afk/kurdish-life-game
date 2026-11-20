@@ -66,3 +66,14 @@ void AKurdishLifeVehiclePawn::Steer(float V)
 }
 void AKurdishLifeVehiclePawn::BrakePressed(){bBraking=true;}
 void AKurdishLifeVehiclePawn::BrakeReleased(){bBraking=false;}
+
+void AKurdishLifeVehiclePawn::UnPossessed()
+{
+    Super::UnPossessed();
+
+    // Do not let stale input keep moving the placeholder vehicle after control is removed.
+    ThrottleInput = 0.0f;
+    Steering = 0.0f;
+    bBraking = false;
+    Speed = 0.0f;
+}
