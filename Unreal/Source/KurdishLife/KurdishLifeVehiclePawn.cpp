@@ -37,23 +37,24 @@ void AKurdishLifeVehiclePawn::Tick(float DeltaSeconds)
     // Apply acceleration in units per second so handling is less dependent on frame rate.
     if (bBraking)
     {
-        Speed = FMath::FInterpTo(Speed, 0.0f, DeltaSeconds, 6.0f);
+        Speed = FMath::FInterpTo(Speed, 0.0f, DeltaSeconds, FMath::Max(0.0f, BrakeInterpSpeed));
     }
     else if (!FMath::IsNearlyZero(ThrottleInput))
     {
-        const float Acceleration = ThrottleInput > 0.0f ? 900.0f : 650.0f;
+        const float Acceleration = FMath::Max(0.0f, ThrottleInput > 0.0f ? ForwardAcceleration : ReverseAcceleration);
         Speed += ThrottleInput * Acceleration * DeltaSeconds;
     }
     else
     {
-        Speed = FMath::FInterpTo(Speed, 0.0f, DeltaSeconds, 0.35f);
+        Speed = FMath::FInterpTo(Speed, 0.0f, DeltaSeconds, FMath::Max(0.0f, CoastingInterpSpeed));
     }
 
-    Speed = FMath::Clamp(Speed, -500.0f, 1600.0f);
+    Speed = FMath::Clamp(Speed, -FMath::Max(0.0f, MaxReverseSpeed), FMath::Max(0.0f, MaxForwardSpeed));
 
     const float SpeedRatio = FMath::Clamp(FMath::Abs(Speed) / 500.0f, 0.0f, 1.0f);
     const float TravelDirection = FMath::Sign(Speed);
-    AddActorLocalRotation(FRotator(0.0f, Steering * TravelDirection * SpeedRatio * 75.0f * DeltaSeconds, 0.0f));
+    const float SteeringRate = FMath::Max(0.0f, MaxSteeringRate);
+    AddActorLocalRotation(FRotator(0.0f, Steering * TravelDirection * SpeedRatio * SteeringRate * DeltaSeconds, 0.0f));
     AddActorLocalOffset(FVector(Speed * DeltaSeconds, 0.0f, 0.0f), true);
 }
 void AKurdishLifeVehiclePawn::Throttle(float V)
