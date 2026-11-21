@@ -24,6 +24,23 @@ private:
     class USpringArmComponent* CameraBoom;
     UPROPERTY(VisibleAnywhere)
     class UCameraComponent* FollowCamera;
+
+    // Editable placeholder handling values, in centimetres and seconds.
+    UPROPERTY(EditAnywhere, Category="Vehicle|Handling", meta=(ClampMin="0.0"))
+    float MaxForwardSpeed = 1600.0f;
+    UPROPERTY(EditAnywhere, Category="Vehicle|Handling", meta=(ClampMin="0.0"))
+    float MaxReverseSpeed = 500.0f;
+    UPROPERTY(EditAnywhere, Category="Vehicle|Handling", meta=(ClampMin="0.0"))
+    float ForwardAcceleration = 900.0f;
+    UPROPERTY(EditAnywhere, Category="Vehicle|Handling", meta=(ClampMin="0.0"))
+    float ReverseAcceleration = 650.0f;
+    UPROPERTY(EditAnywhere, Category="Vehicle|Handling", meta=(ClampMin="0.0"))
+    float BrakeInterpSpeed = 6.0f;
+    UPROPERTY(EditAnywhere, Category="Vehicle|Handling", meta=(ClampMin="0.0"))
+    float CoastingInterpSpeed = 0.35f;
+    UPROPERTY(EditAnywhere, Category="Vehicle|Handling", meta=(ClampMin="0.0"))
+    float MaxSteeringRate = 75.0f;
+
     float Speed = 0.0f;
     float Steering = 0.0f;
     float ThrottleInput = 0.0f;
