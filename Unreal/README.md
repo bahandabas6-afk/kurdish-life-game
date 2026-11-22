@@ -24,11 +24,17 @@ This repository does not contain a prebuilt executable, an iOS/Android package, 
 ## Build the editor target on Windows
 
 1. Clone or download the repository and keep the `Unreal/` folder structure intact.
-2. Install Unreal Engine 5.4 and Visual Studio 2022 with the C++ workload.
-3. Right-click `Unreal/KurdishLife.uproject` and choose **Generate Visual Studio project files**.
-4. Open the generated `.sln` file in Visual Studio.
-5. Select **Development Editor** and **Win64**, then build the `KurdishLifeEditor` target. Allow Unreal to compile shaders and generate project files on first launch.
-6. Open `KurdishLife.uproject` in Unreal Editor. If Unreal asks to rebuild the module, use the Visual Studio build step above first.
+2. Install Unreal Engine 5.4 and Visual Studio 2022 with the **Game development with C++** workload and a Windows SDK.
+3. From the repository root, run the helper script in PowerShell:
+
+   ```powershell
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Unreal\BuildEditor-Windows.ps1 -EngineRoot "C:\Program Files\Epic Games\UE_5.4"
+   ```
+
+   The script checks that the project file and Unreal Build Tool exist, verifies that the selected engine reports version 5.4, then asks Unreal Build Tool to compile `KurdishLifeEditor` for `Win64 Development`. If Unreal is installed elsewhere, pass its installation root with `-EngineRoot`. You can also set `UE_5_4_ROOT` and omit that parameter. This builds the editor C++ target; it does **not** create a packaged game or a saved level.
+4. When the build succeeds, open `Unreal/KurdishLife.uproject` in Unreal Editor and follow **Make a first playable editor preview** below.
+
+If you prefer Visual Studio, right-click `Unreal/KurdishLife.uproject`, choose **Generate Visual Studio project files**, open the generated `.sln`, select **Development Editor** and **Win64**, and build `KurdishLifeEditor`. Then open the `.uproject` in Unreal Editor. If the editor asks to rebuild the module, complete the C++ build first.
 
 ## Make a first playable editor preview
 
@@ -68,7 +74,7 @@ Place a `KurdishLifeVehiclePawn` in the level and set up possession from a Playe
 
 The current milestone is a **source-only Unreal starter** with a visible primitive character proxy and a procedural city greybox generator. It is not GTA-scale, and this repository has not been compiled or opened in Unreal in this environment. No screenshot, rendered level, executable, Windows package, or iOS/Android build has been produced or verified.
 
-Source review on 2026-11-16: the city builder's generated-component cleanup loop was changed to iterate its `TObjectPtr` array directly, avoiding pointer-deduction ambiguity. On 2026-11-17, the greybox road/sidewalk widths and building placement margins were made proportional to block spacing to reduce street-edge overlap when the grid size is adjusted. On 2026-11-18, vehicle throttle was changed from per-input-callback acceleration to `DeltaSeconds`-scaled acceleration, input values were clamped, and reverse steering was made to follow travel direction. These are source-level changes only; they still need a Development Editor build and in-editor driving checks in Unreal Engine 5.4. On 2026-11-19, progression rewards were changed to saturate at the maximum signed 32-bit wallet balance and the money-change event now reports only the amount actually credited, avoiding integer overflow from unusually large rewards. On 2026-11-20, the vehicle pawn was updated to clear its control and speed state when it is unpossessed; verify the callback and the intended enter/exit flow in the editor. On 2026-11-21, the placeholder vehicle's handling values were exposed in the Details panel so the speed limits, acceleration, brake/coast response and steering rate can be tuned per placed pawn; these settings still need in-editor validation.
+Source review on 2026-11-16: the city builder's generated-component cleanup loop was changed to iterate its `TObjectPtr` array directly, avoiding pointer-deduction ambiguity. On 2026-11-17, the greybox road/sidewalk widths and building placement margins were made proportional to block spacing to reduce street-edge overlap when the grid size is adjusted. On 2026-11-18, vehicle throttle was changed from per-input-callback acceleration to `DeltaSeconds`-scaled acceleration, input values were clamped, and reverse steering was made to follow travel direction. These are source-level changes only; they still need a Development Editor build and in-editor driving checks in Unreal Engine 5.4. On 2026-11-19, progression rewards were changed to saturate at the maximum signed 32-bit wallet balance and the money-change event now reports only the amount actually credited, avoiding integer overflow from unusually large rewards. On 2026-11-20, the vehicle pawn was updated to clear its control and speed state when it is unpossessed; verify the callback and the intended enter/exit flow in the editor. On 2026-11-21, the placeholder vehicle's handling values were exposed in the Details panel so the speed limits, acceleration, brake/coast response and steering rate can be tuned per placed pawn; these settings still need in-editor validation. On 2026-11-22, a Windows PowerShell helper was added to validate the selected Unreal installation is 5.4 and invoke the Development Editor build; the script itself has not been run in this environment.
 
 Still required for a convincing demo: compile and editor verification on Windows; save and review the first `.umap`; custom Aras character mesh, rig and animation; authored Sulaymaniyah buildings, roads, signs and materials; reliable vehicle possession/entry/exit; NPCs and traffic; job/mission UI and save persistence; audio; and mobile touch controls plus platform-specific packaging and testing.
 
