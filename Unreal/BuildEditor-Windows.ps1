@@ -13,6 +13,39 @@ if (-not (Test-Path -LiteralPath $ProjectFile -PathType Leaf)) {
     exit 2
 }
 
+try {
+    $ProjectDescriptor = Get-Content -LiteralPath $ProjectFile -Raw | ConvertFrom-Json -ErrorAction Stop
+}
+catch {
+    Write-Error "Project descriptor is not valid JSON: $($_.Exception.Message)"
+    exit 2
+}
+
+$RuntimeModules = @($ProjectDescriptor.Modules | Where-Object {
+    $_.Name -eq "KurdishLife" -and $_.Type -eq "Runtime"
+})
+if ($RuntimeModules.Count -ne 1) {
+    Write-Error "KurdishLife.uproject must declare exactly one Runtime module named KurdishLife."
+    exit 2
+}
+
+$RequiredProjectFiles = @(
+    "Source\KurdishLife.Target.cs",
+    "Source\KurdishLifeEditor.Target.cs",
+    "Source\KurdishLife\KurdishLife.Build.cs",
+    "Source\KurdishLife\KurdishLifeGameModeBase.h",
+    "Source\KurdishLife\KurdishLifeGameModeBase.cpp"
+)
+foreach ($RelativePath in $RequiredProjectFiles) {
+    $RequiredPath = Join-Path $PSScriptRoot $RelativePath
+    if (-not (Test-Path -LiteralPath $RequiredPath -PathType Leaf)) {
+        Write-Error "Required Unreal project file is missing: $RequiredPath"
+        exit 2
+    }
+}
+
+Write-Host "Project descriptor and required module/target files passed preflight checks."
+
 if ([string]::IsNullOrWhiteSpace($EngineRoot)) {
     $EngineRoot = "C:\Program Files\Epic Games\UE_5.4"
 }
