@@ -1,7 +1,8 @@
 # Build the Unreal Editor target for Kurdish Life using the installed UE 5.4 toolchain.
 [CmdletBinding()]
 param(
-    [string]$EngineRoot = $env:UE_5_4_ROOT
+    [string]$EngineRoot = $env:UE_5_4_ROOT,
+    [switch]$PreflightOnly
 )
 
 Set-StrictMode -Version Latest
@@ -21,6 +22,11 @@ catch {
     exit 2
 }
 
+if ($ProjectDescriptor.EngineAssociation -ne "5.4") {
+    Write-Error "KurdishLife.uproject must target Unreal Engine 5.4; found '$($ProjectDescriptor.EngineAssociation)'."
+    exit 2
+}
+
 $RuntimeModules = @($ProjectDescriptor.Modules | Where-Object {
     $_.Name -eq "KurdishLife" -and $_.Type -eq "Runtime"
 })
@@ -33,9 +39,18 @@ $RequiredProjectFiles = @(
     "Source\KurdishLife.Target.cs",
     "Source\KurdishLifeEditor.Target.cs",
     "Source\KurdishLife\KurdishLife.Build.cs",
+    "Source\KurdishLife\KurdishLife.h",
+    "Source\KurdishLife\KurdishLife.cpp",
+    "Source\KurdishLife\KurdishLifeCharacter.h",
+    "Source\KurdishLife\KurdishLifeCharacter.cpp",
+    "Source\KurdishLife\KurdishLifeCityBuilder.h",
+    "Source\KurdishLife\KurdishLifeCityBuilder.cpp",
     "Source\KurdishLife\KurdishLifeGameModeBase.h",
-    "Source\KurdishLife\KurdishLifeGameModeBase.cpp"
-)
+    "Source\KurdishLife\KurdishLifeGameModeBase.cpp",
+    "Source\KurdishLife\KurdishLifeProgressionComponent.h",
+    "Source\KurdishLife\KurdishLifeProgressionComponent.cpp",
+    "Source\KurdishLife\KurdishLifeVehiclePawn.h",
+    "Source\KurdishLife\KurdishLifeVehiclePawn.cpp"
 foreach ($RelativePath in $RequiredProjectFiles) {
     $RequiredPath = Join-Path $PSScriptRoot $RelativePath
     if (-not (Test-Path -LiteralPath $RequiredPath -PathType Leaf)) {
@@ -45,6 +60,11 @@ foreach ($RelativePath in $RequiredProjectFiles) {
 }
 
 Write-Host "Project descriptor and required module/target files passed preflight checks."
+
+if ($PreflightOnly) {
+    Write-Host "Preflight-only mode: Unreal installation and C++ compilation were not checked."
+    exit 0
+}
 
 if ([string]::IsNullOrWhiteSpace($EngineRoot)) {
     $EngineRoot = "C:\Program Files\Epic Games\UE_5.4"
