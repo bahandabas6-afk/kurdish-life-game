@@ -1,0 +1,25 @@
+name: Unreal source preflight
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "Unreal/**"
+      - ".github/workflows/unreal-source-preflight.yml"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "Unreal/**"
+      - ".github/workflows/unreal-source-preflight.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  project-preflight:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Unreal project descriptor and source layout
+        shell: pwsh
+        run: ./Unreal/BuildEditor-Windows.ps1 -PreflightOnly
