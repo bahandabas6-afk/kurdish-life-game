@@ -51,6 +51,7 @@ $RequiredProjectFiles = @(
     "Source\KurdishLife\KurdishLifeProgressionComponent.cpp",
     "Source\KurdishLife\KurdishLifeVehiclePawn.h",
     "Source\KurdishLife\KurdishLifeVehiclePawn.cpp"
+)
 foreach ($RelativePath in $RequiredProjectFiles) {
     $RequiredPath = Join-Path $PSScriptRoot $RelativePath
     if (-not (Test-Path -LiteralPath $RequiredPath -PathType Leaf)) {
