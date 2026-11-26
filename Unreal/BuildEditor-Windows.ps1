@@ -50,7 +50,8 @@ $RequiredProjectFiles = @(
     "Source\KurdishLife\KurdishLifeProgressionComponent.h",
     "Source\KurdishLife\KurdishLifeProgressionComponent.cpp",
     "Source\KurdishLife\KurdishLifeVehiclePawn.h",
-    "Source\KurdishLife\KurdishLifeVehiclePawn.cpp"
+    "Source\KurdishLife\KurdishLifeVehiclePawn.cpp",
+    "Config\DefaultInput.ini"
 )
 foreach ($RelativePath in $RequiredProjectFiles) {
     $RequiredPath = Join-Path $PSScriptRoot $RelativePath
@@ -60,7 +61,37 @@ foreach ($RelativePath in $RequiredProjectFiles) {
     }
 }
 
-Write-Host "Project descriptor and required module/target files passed preflight checks."
+# Check that every legacy input name bound in C++ has a matching entry in DefaultInput.ini.
+$InputConfigPath = Join-Path $PSScriptRoot "Config\DefaultInput.ini"
+$InputConfig = Get-Content -LiteralPath $InputConfigPath -Raw
+$BindingSourceFiles = @(
+    "Source\KurdishLife\KurdishLifeCharacter.cpp",
+    "Source\KurdishLife\KurdishLifeVehiclePawn.cpp"
+)
+foreach ($RelativePath in $BindingSourceFiles) {
+    $SourcePath = Join-Path $PSScriptRoot $RelativePath
+    $SourceText = Get-Content -LiteralPath $SourcePath -Raw
+
+    foreach ($Match in [regex]::Matches($SourceText, 'BindAxis\(\s*"([^"]+)"')) {
+        $AxisName = $Match.Groups[1].Value
+        $Pattern = 'AxisName\s*=\s*"' + [regex]::Escape($AxisName) + '"'
+        if (-not [regex]::IsMatch($InputConfig, $Pattern)) {
+            Write-Error "C++ axis binding '$AxisName' in '$RelativePath' has no AxisName entry in Config\DefaultInput.ini."
+            exit 2
+        }
+    }
+
+    foreach ($Match in [regex]::Matches($SourceText, 'BindAction\(\s*"([^"]+)"')) {
+        $ActionName = $Match.Groups[1].Value
+        $Pattern = 'ActionName\s*=\s*"' + [regex]::Escape($ActionName) + '"'
+        if (-not [regex]::IsMatch($InputConfig, $Pattern)) {
+            Write-Error "C++ action binding '$ActionName' in '$RelativePath' has no ActionName entry in Config\DefaultInput.ini."
+            exit 2
+        }
+    }
+}
+
+Write-Host "Project descriptor, required files and C++ legacy input declarations passed preflight checks."
 
 if ($PreflightOnly) {
     Write-Host "Preflight-only mode: Unreal installation and C++ compilation were not checked."
