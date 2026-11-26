@@ -28,7 +28,7 @@ This repository does not contain a prebuilt executable, an iOS/Android package, 
 3. From the repository root, run the helper script in PowerShell:
 
    ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\Unreal\\BuildEditor-Windows.ps1 -EngineRoot "C:\\Program Files\\Epic Games\\UE_5.4"
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Unreal\BuildEditor-Windows.ps1 -EngineRoot "C:\Program Files\Epic Games\UE_5.4"
    ```
 
    Before invoking Unreal Build Tool, the script parses the `.uproject` JSON, checks that `EngineAssociation` is `5.4`, checks for exactly one `KurdishLife` Runtime module, and verifies that the Game/Editor targets plus every current module header/source file and `Config/DefaultInput.ini` exist. It also scans the character and vehicle C++ files for legacy `BindAxis`/`BindAction` names and confirms that each has a corresponding `AxisName`/`ActionName` declaration in `DefaultInput.ini`. It then checks that the Unreal Build Tool files exist, verifies that the selected engine reports version 5.4, and asks Unreal Build Tool to compile `KurdishLifeEditor` for `Win64 Development`. These preflight checks validate project structure and input-name consistency only; they do **not** prove that the C++ code compiles or that a physical controller works. The same source checks can run without an Unreal installation by passing `-PreflightOnly`; a Windows GitHub Actions workflow runs that mode when Unreal source or the workflow changes. If Unreal is installed elsewhere, pass its installation root with `-EngineRoot`. You can also set `UE_5_4_ROOT` and omit that parameter. This builds the editor C++ target; it does **not** create a packaged game or a saved level.
