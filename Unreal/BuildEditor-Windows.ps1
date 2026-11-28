@@ -96,57 +96,7 @@ foreach ($RelativePath in $BindingSourceFiles) {
 $EngineConfigPath = Join-Path $PSScriptRoot "Config\DefaultEngine.ini"
 $EngineConfig = Get-Content -LiteralPath $EngineConfigPath -Raw
 $ExpectedGameMode = "/Script/KurdishLife.KurdishLifeGameModeBase"
-$GameModePattern = '(?m)^[ \t]*GlobalDefaultGameMode[ \t]*=[ \t]*' + [regex]::Escape($ExpectedGameMode) + '[ \t]*
-
-if ($PreflightOnly) {
-    Write-Host "Preflight-only mode: Unreal installation and C++ compilation were not checked."
-    exit 0
-}
-
-if ([string]::IsNullOrWhiteSpace($EngineRoot)) {
-    $EngineRoot = "C:\Program Files\Epic Games\UE_5.4"
-}
-
-$BuildScript = Join-Path $EngineRoot "Engine\Build\BatchFiles\Build.bat"
-$BuildVersionFile = Join-Path $EngineRoot "Engine\Build\Build.version"
-
-if (-not (Test-Path -LiteralPath $BuildScript -PathType Leaf)) {
-    Write-Error "Unreal Build.bat not found under '$EngineRoot'. Pass -EngineRoot or set UE_5_4_ROOT."
-    exit 2
-}
-
-if (-not (Test-Path -LiteralPath $BuildVersionFile -PathType Leaf)) {
-    Write-Error "Unreal Build.version not found under '$EngineRoot'. Check the EngineRoot path."
-    exit 2
-}
-
-$EngineVersion = Get-Content -LiteralPath $BuildVersionFile -Raw | ConvertFrom-Json
-if ($EngineVersion.MajorVersion -ne 5 -or $EngineVersion.MinorVersion -ne 4) {
-    Write-Error "This project targets Unreal Engine 5.4, but the selected engine reports $($EngineVersion.MajorVersion).$($EngineVersion.MinorVersion)."
-    exit 2
-}
-
-Write-Host "Building KurdishLifeEditor (Win64 Development) with Unreal Engine 5.4..."
-$BuildArguments = @(
-    "KurdishLifeEditor",
-    "Win64",
-    "Development",
-    "-Project=$ProjectFile",
-    "-WaitMutex",
-    "-NoHotReloadFromIDE"
-)
-
-& $BuildScript @BuildArguments
-$BuildExitCode = $LASTEXITCODE
-
-if ($BuildExitCode -ne 0) {
-    Write-Error "UnrealBuildTool failed with exit code $BuildExitCode."
-    exit $BuildExitCode
-}
-
-Write-Host "Editor target build completed. Open KurdishLife.uproject in Unreal Editor to create and test the preview map."
-exit 0
-
+$GameModePattern = '(?m)^[ \t]*GlobalDefaultGameMode[ \t]*=[ \t]*' + [regex]::Escape($ExpectedGameMode) + '[ \t]*$'
 if (-not [regex]::IsMatch($EngineConfig, $GameModePattern)) {
     Write-Error "Config\DefaultEngine.ini must set GlobalDefaultGameMode to '$ExpectedGameMode'."
     exit 2
