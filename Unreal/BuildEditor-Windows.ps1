@@ -96,7 +96,7 @@ foreach ($RelativePath in $BindingSourceFiles) {
 $EngineConfigPath = Join-Path $PSScriptRoot "Config\DefaultEngine.ini"
 $EngineConfig = Get-Content -LiteralPath $EngineConfigPath -Raw
 $ExpectedGameMode = "/Script/KurdishLife.KurdishLifeGameModeBase"
-$GameModePattern = '(?m)^[ \t]*GlobalDefaultGameMode[ \t]*=[ \t]*' + [regex]::Escape($ExpectedGameMode) + '[ \t]*$'
+$GameModePattern = '(?m)^[ \t]*GlobalDefaultGameMode[ \t]*=[ \t]*' + [regex]::Escape($ExpectedGameMode) + '[ \t]*\r?$'
 if (-not [regex]::IsMatch($EngineConfig, $GameModePattern)) {
     Write-Error "Config\DefaultEngine.ini must set GlobalDefaultGameMode to '$ExpectedGameMode'."
     exit 2
